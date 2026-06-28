@@ -128,7 +128,7 @@
       var message = data.get("message") || "";
 
       // إرسال عبر واتساب / Send via WhatsApp
-      var waNumber = "966581329955";
+      var waNumber = "966506753218";
       var lines = lang === "ar"
         ? ["مرحباً، طلب جديد من الموقع:", "الاسم: " + name, "الجوال: " + phone, "الخدمة: " + service, "الرسالة: " + message]
         : ["Hello, new request from the website:", "Name: " + name, "Phone: " + phone, "Service: " + service, "Message: " + message];
@@ -141,4 +141,107 @@
   /* -------- سنة الفوتر / Footer year -------- */
   var yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+  /* -------- معرض التكبير والتزويم / Image lightbox + zoom -------- */
+  (function () {
+    var box = document.createElement("div");
+    box.className = "lightbox";
+    box.innerHTML =
+      '<button class="lightbox__btn lightbox__close" aria-label="إغلاق">&times;</button>' +
+      '<div class="lightbox__stage"><img class="lightbox__img" alt="" /></div>' +
+      '<div class="lightbox__zoom">' +
+        '<button class="lightbox__btn" data-z="out" aria-label="تصغير">&minus;</button>' +
+        '<button class="lightbox__btn" data-z="reset" aria-label="إعادة الضبط">&#9974;</button>' +
+        '<button class="lightbox__btn" data-z="in" aria-label="تكبير">&plus;</button>' +
+      "</div>";
+    document.body.appendChild(box);
+
+    var img = box.querySelector(".lightbox__img");
+    var scale = 1, tx = 0, ty = 0;
+    var dragging = false, moved = false, sx = 0, sy = 0;
+
+    function apply() {
+      img.style.transform = "translate(" + tx + "px," + ty + "px) scale(" + scale + ")";
+      img.classList.toggle("zoomed", scale > 1);
+    }
+    function reset() { scale = 1; tx = 0; ty = 0; apply(); }
+    function open(src, alt) {
+      img.src = src; img.alt = alt || "";
+      reset();
+      box.classList.add("open");
+      document.body.style.overflow = "hidden";
+    }
+    function close() {
+      box.classList.remove("open");
+      document.body.style.overflow = "";
+    }
+    function setScale(s) {
+      scale = Math.min(5, Math.max(1, s));
+      if (scale === 1) { tx = 0; ty = 0; }
+      apply();
+    }
+
+    // فتح الصور القابلة للتكبير / open zoomable images
+    document.addEventListener("click", function (e) {
+      var z = e.target.closest("img.zoomable");
+      if (z && !e.target.closest("a")) {
+        e.preventDefault();
+        open(z.currentSrc || z.src, z.alt);
+      }
+    });
+
+    // أزرار التحكم / control buttons
+    box.querySelector(".lightbox__zoom").addEventListener("click", function (e) {
+      var b = e.target.closest("[data-z]"); if (!b) return;
+      var z = b.getAttribute("data-z");
+      if (z === "in") setScale(scale + 0.5);
+      else if (z === "out") setScale(scale - 0.5);
+      else reset();
+    });
+
+    box.querySelector(".lightbox__close").addEventListener("click", close);
+    box.addEventListener("click", function (e) {
+      if (e.target === box || e.target.classList.contains("lightbox__stage")) close();
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && box.classList.contains("open")) close();
+    });
+
+    // عجلة الماوس للتزويم / wheel zoom
+    box.addEventListener("wheel", function (e) {
+      if (!box.classList.contains("open")) return;
+      e.preventDefault();
+      setScale(scale + (e.deltaY < 0 ? 0.3 : -0.3));
+    }, { passive: false });
+
+    // النقر على الصورة: تبديل التكبير / click image: toggle zoom
+    img.addEventListener("click", function (e) {
+      e.stopPropagation();
+      if (moved) { moved = false; return; }
+      setScale(scale > 1 ? 1 : 2);
+    });
+
+    // السحب للتحريك عند التكبير / drag to pan when zoomed
+    img.addEventListener("mousedown", function (e) {
+      if (scale <= 1) return;
+      dragging = true; moved = false; sx = e.clientX - tx; sy = e.clientY - ty;
+      e.preventDefault();
+    });
+    window.addEventListener("mousemove", function (e) {
+      if (!dragging) return;
+      tx = e.clientX - sx; ty = e.clientY - sy; moved = true; apply();
+    });
+    window.addEventListener("mouseup", function () { dragging = false; });
+
+    // اللمس للجوال / basic touch pan
+    img.addEventListener("touchstart", function (e) {
+      if (scale <= 1 || e.touches.length !== 1) return;
+      dragging = true; sx = e.touches[0].clientX - tx; sy = e.touches[0].clientY - ty;
+    }, { passive: true });
+    img.addEventListener("touchmove", function (e) {
+      if (!dragging || e.touches.length !== 1) return;
+      tx = e.touches[0].clientX - sx; ty = e.touches[0].clientY - sy; apply();
+    }, { passive: true });
+    img.addEventListener("touchend", function () { dragging = false; });
+  })();
 })();
