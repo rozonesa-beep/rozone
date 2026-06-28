@@ -128,7 +128,7 @@
       var message = data.get("message") || "";
 
       // إرسال عبر واتساب / Send via WhatsApp
-      var waNumber = "966581329955";
+      var waNumber = "966506753218";
       var lines = lang === "ar"
         ? ["مرحباً، طلب جديد من الموقع:", "الاسم: " + name, "الجوال: " + phone, "الخدمة: " + service, "الرسالة: " + message]
         : ["Hello, new request from the website:", "Name: " + name, "Phone: " + phone, "Service: " + service, "Message: " + message];
