@@ -717,14 +717,12 @@ html[dir="ltr"] .lightbox__zoom { transform: translateX(-50%); }
     padding: 24px;
     gap: 6px;
     box-shadow: var(--shadow-lg);
-    transform: translateX(110%);
     visibility: hidden;
     opacity: 0;
-    transition: transform var(--transition), visibility var(--transition), opacity var(--transition);
+    transform: translateY(-8px);
+    transition: opacity var(--transition), transform var(--transition), visibility var(--transition);
   }
-  html[dir="rtl"] .nav { transform: translateX(-110%); }
-  .nav.open,
-  html[dir="rtl"] .nav.open { transform: translateX(0) !important; visibility: visible !important; opacity: 1 !important; }
+  .nav.open { visibility: visible; opacity: 1; transform: translateY(0); }
   .nav a { padding: 14px 16px; border-radius: 10px; }
   .nav a.active::after { display: none; }
   .nav a.active { background: var(--bg-soft); }
